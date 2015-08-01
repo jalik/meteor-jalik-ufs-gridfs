@@ -10,9 +10,17 @@ Package.describe({
 
 Package.onUse(function (api) {
     api.versionsFrom('1.1.0.2');
+
+    api.use('mongo');
     api.use('jalik:ufs@0.2.2');
+
     api.addFiles('ufs-gridfs.js');
 });
+
+Npm.depends({
+    'gridfs-stream': '0.5.3'
+});
+
 
 Package.onTest(function (api) {
     api.use('tinytest');
