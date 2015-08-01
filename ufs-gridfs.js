@@ -85,6 +85,7 @@ UploadFS.store.GridFS = function (options) {
                 _id: fileId,
                 filename: fileId,
                 mode: 'w',
+                chunkSize: options.chunkSize,
                 root: options.collectionName
                 // content_type: contentType
             });
