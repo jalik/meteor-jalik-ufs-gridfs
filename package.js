@@ -12,7 +12,7 @@ Package.onUse(function (api) {
     api.versionsFrom('1.1.0.2');
 
     api.use('mongo');
-    api.use('jalik:ufs@0.2.2');
+    api.use('jalik:ufs@0.2.4');
 
     api.addFiles('ufs-gridfs.js');
 });
