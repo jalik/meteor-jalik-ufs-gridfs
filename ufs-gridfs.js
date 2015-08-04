@@ -32,12 +32,6 @@ UploadFS.store.GridFS = function (options) {
 
         mongoStore = new Grid(db, mongo);
 
-        findOne = mongoStore.collection(options.collectionName).findOne.bind(mongoStore.collection(options.collectionName));
-        remove = mongoStore.remove.bind(mongoStore);
-
-        findOneSync = Meteor.wrapAsync(findOne);
-        removeSync = Meteor.wrapAsync(remove);
-
         /**
          * Removes the file
          * @param fileId
@@ -51,13 +45,9 @@ UploadFS.store.GridFS = function (options) {
                     }
                 }
             }
-            var file = findOneSync({_id: fileId});
-            if (file == undefined) {
-                return undefined;
-            }
-
-            return remove({
-                _id: fileId,
+            
+            return mongoStore.remove({
+                filename: fileId,
                 root: options.collectionName
             }, callback);
         };
@@ -79,15 +69,14 @@ UploadFS.store.GridFS = function (options) {
          * @param fileId
          * @return {*}
          */
-        store.getWriteStream = function (fileId) {
-            console.log(arguments)
+        store.getWriteStream = function (fileId, file) {
             var writeStream = mongoStore.createWriteStream({
                 _id: fileId,
                 filename: fileId,
                 mode: 'w',
                 chunkSize: options.chunkSize,
-                root: options.collectionName
-                // content_type: contentType
+                root: options.collectionName,
+                content_type: file.type
             });
 
             writeStream.on('close', function() {
