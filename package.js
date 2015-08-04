@@ -1,7 +1,7 @@
 Package.describe({
     name: 'jalik:ufs-gridfs',
     version: '0.1.0',
-    author: 'karl.stein.pro@gmail.com',
+    author: 'rodrigoknascimento@gmail.com',
     summary: 'GridFS store for UploadFS',
     homepage: 'https://github.com/jalik/jalik-ufs-gridfs',
     git: 'https://github.com/jalik/jalik-ufs-gridfs.git',
