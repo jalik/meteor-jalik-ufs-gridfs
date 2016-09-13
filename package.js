@@ -1,6 +1,6 @@
 Package.describe({
     name: 'jalik:ufs-gridfs',
-    version: '0.1.1',
+    version: '0.1.2',
     author: 'rodrigoknascimento@gmail.com',
     summary: 'GridFS store for UploadFS',
     homepage: 'https://github.com/jalik/jalik-ufs-gridfs',
@@ -19,7 +19,7 @@ Package.onUse(function (api) {
 });
 
 Npm.depends({
-    'gridfs-stream': '0.5.3'
+    'gridfs-stream': '1.1.1'
 });
 
 Package.onTest(function (api) {
