@@ -1,6 +1,6 @@
-if (Meteor.isServer) {
-    var Grid = Npm.require('gridfs-stream');
-}
+import {_} from 'meteor/underscore';
+import {check} from 'meteor/check';
+import {Meteor} from 'meteor/meteor';
 
 /**
  * GridFS store
@@ -8,29 +8,31 @@ if (Meteor.isServer) {
  * @constructor
  */
 UploadFS.store.GridFS = function (options) {
-    // Set default options
+    // Default options
     options = _.extend({
         chunkSize: 1024 * 255,
         collectionName: 'uploadfs'
     }, options);
 
     // Check options
-    if (!Match.test(options.chunkSize, Number)) {
+    if (typeof options.chunkSize !== 'number') {
         throw new TypeError('chunkSize is not a number');
     }
-
-    if (!Match.test(options.collectionName, String)) {
+    if (typeof options.collectionName !== 'string') {
         throw new TypeError('collectionName is not a string');
     }
 
     // Create the store
-    var store = new UploadFS.Store(options);
+    let store = new UploadFS.Store(options);
+
+    store.chunkSize = options.chunkSize;
+    store.collectionName = options.collectionName;
 
     if (Meteor.isServer) {
-        var mongo = Package.mongo.MongoInternals.NpmModule;
-        var db = Package.mongo.MongoInternals.defaultRemoteCollectionDriver().mongo.db;
-
-        mongoStore = new Grid(db, mongo);
+        const GridFS = Npm.require('gridfs-stream');
+        let mongo = Package.mongo.MongoInternals.NpmModule;
+        let db = Package.mongo.MongoInternals.defaultRemoteCollectionDriver().mongo.db;
+        let mongoStore = new GridFS(db, mongo);
 
         /**
          * Removes the file
@@ -45,7 +47,6 @@ UploadFS.store.GridFS = function (options) {
                     }
                 }
             }
-            
             return mongoStore.remove({
                 filename: fileId,
                 root: options.collectionName
@@ -55,34 +56,41 @@ UploadFS.store.GridFS = function (options) {
         /**
          * Returns the file read stream
          * @param fileId
+         * @param file
+         * @param options
          * @return {*}
          */
-        store.getReadStream = function (fileId) {
+        store.getReadStream = function (fileId, file, options) {
+            options = _.extend({}, options);
             return mongoStore.createReadStream({
                 _id: fileId,
-                root: options.collectionName
+                root: store.collectionName,
+                range: {
+                    startPos: options.start,
+                    endPos: options.end
+                }
             });
         };
 
         /**
          * Returns the file write stream
          * @param fileId
+         * @param file
+         * @param options
          * @return {*}
          */
-        store.getWriteStream = function (fileId, file) {
-            var writeStream = mongoStore.createWriteStream({
+        store.getWriteStream = function (fileId, file, options) {
+            let writeStream = mongoStore.createWriteStream({
                 _id: fileId,
                 filename: fileId,
                 mode: 'w',
-                chunkSize: options.chunkSize,
-                root: options.collectionName,
+                chunkSize: store.chunkSize,
+                root: store.collectionName,
                 content_type: file.type
             });
-
-            writeStream.on('close', function() {
+            writeStream.on('close', function () {
                 writeStream.emit('finish');
             });
-
             return writeStream;
         };
     }

@@ -14,17 +14,17 @@ If later you want to remove the package :
 meteor remove jalik:ufs-gridfs
 ```
 
-### Create a Store
+### Creating a Store
 
 **The code below is available on the client and the server.**
 
 GridFS store files in a Mongo database by cutting them in chunks.
 
 ```js
-Meteor.photos = new Mongo.Collection('photos');
+let Photos = new Mongo.Collection('photos');
 
-Meteor.photosStore = new UploadFS.store.GridFS({
-    collection: Meteor.photos,
+let PhotoStore = new UploadFS.store.GridFS({
+    collection: Photos,
     name: 'photos',
     chunkSize: 1024 * 255
 });
