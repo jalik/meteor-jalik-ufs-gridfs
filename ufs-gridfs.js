@@ -32,8 +32,8 @@ UploadFS.store.GridFS = function (options) {
         let mongo = Package.mongo.MongoInternals.NpmModule;
         let db = Package.mongo.MongoInternals.defaultRemoteCollectionDriver().mongo.db;
         let mongoStore = new mongo.GridFSBucket(db, {
-          bucketName: options.collectionName,
-          chunkSizeBytes: options.chunkSize
+            bucketName: options.collectionName,
+            chunkSizeBytes: options.chunkSize
         });
 
         /**
@@ -62,8 +62,8 @@ UploadFS.store.GridFS = function (options) {
         store.getReadStream = function (fileId, file, options) {
             options = _.extend({}, options);
             return mongoStore.openDownloadStream(fileId, {
-              start: options.start,
-              end: options.end
+                start: options.start,
+                end: options.end
             });
         };
 
@@ -76,8 +76,8 @@ UploadFS.store.GridFS = function (options) {
          */
         store.getWriteStream = function (fileId, file, options) {
             let writeStream = mongoStore.openUploadStreamWithId(fileId, fileId, {
-              chunkSizeBytes: store.chunkSize,
-              contentType: file.type
+                chunkSizeBytes: store.chunkSize,
+                contentType: file.type
             });
             writeStream.on('close', function () {
                 writeStream.emit('finish');
