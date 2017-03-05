@@ -51,16 +51,17 @@ export class GridFSStore extends UploadFS.Store {
         }
 
         super(options);
-        let self = this;
 
         this.chunkSize = options.chunkSize;
         this.collectionName = options.collectionName;
 
         if (Meteor.isServer) {
-            const GridFS = Npm.require('gridfs-stream');
             let mongo = Package.mongo.MongoInternals.NpmModule;
             let db = Package.mongo.MongoInternals.defaultRemoteCollectionDriver().mongo.db;
-            let mongoStore = new GridFS(db, mongo);
+            let mongoStore = new mongo.GridFSBucket(db, {
+                bucketName: options.collectionName,
+                chunkSizeBytes: options.chunkSize
+            });
 
             /**
              * Removes the file
@@ -75,10 +76,7 @@ export class GridFSStore extends UploadFS.Store {
                         }
                     }
                 }
-                return mongoStore.remove({
-                    filename: fileId,
-                    root: options.collectionName
-                }, callback);
+                return mongoStore.delete(fileId, callback);
             };
 
             /**
@@ -90,13 +88,9 @@ export class GridFSStore extends UploadFS.Store {
              */
             this.getReadStream = function (fileId, file, options) {
                 options = _.extend({}, options);
-                return mongoStore.createReadStream({
-                    _id: fileId,
-                    root: self.collectionName,
-                    range: {
-                        startPos: options.start,
-                        endPos: options.end
-                    }
+                return mongoStore.openDownloadStream(fileId, {
+                    start: options.start,
+                    end: options.end
                 });
             };
 
@@ -108,13 +102,9 @@ export class GridFSStore extends UploadFS.Store {
              * @return {*}
              */
             this.getWriteStream = function (fileId, file, options) {
-                let writeStream = mongoStore.createWriteStream({
-                    _id: fileId,
-                    filename: fileId,
-                    mode: 'w',
-                    chunkSize: self.chunkSize,
-                    root: self.collectionName,
-                    content_type: file.type
+                let writeStream = mongoStore.openUploadStreamWithId(fileId, fileId, {
+                    chunkSizeBytes: this.chunkSize,
+                    contentType: file.type
                 });
                 writeStream.on('close', function () {
                     writeStream.emit('finish');
