@@ -25,7 +25,7 @@
 
 Package.describe({
     name: 'jalik:ufs-gridfs',
-    version: '0.2.0',
+    version: '0.2.1',
     author: 'rodrigoknascimento@gmail.com',
     summary: 'GridFS store for UploadFS',
     homepage: 'https://github.com/jalik/jalik-ufs-gridfs',
@@ -40,5 +40,5 @@ Package.onUse(function (api) {
     api.use('underscore@1.0.10');
     api.use('mongo@1.1.14');
     api.use('jalik:ufs@0.7.4_1');
-    api.addFiles('ufs-gridfs.js');
+    api.mainModule('ufs-gridfs.js');
 });
