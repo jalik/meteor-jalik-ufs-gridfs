@@ -22,8 +22,6 @@
  * SOFTWARE.
  *
  */
-import {_} from "meteor/underscore";
-import {check} from "meteor/check";
 import {Meteor} from "meteor/meteor";
 import {UploadFS} from "meteor/jalik:ufs";
 
@@ -37,7 +35,7 @@ export class GridFSStore extends UploadFS.Store {
 
     constructor(options) {
         // Default options
-        options = _.extend({
+        options = Object.assign({
             chunkSize: 1024 * 255,
             collectionName: 'uploadfs'
         }, options);
@@ -72,11 +70,17 @@ export class GridFSStore extends UploadFS.Store {
                 if (typeof callback !== 'function') {
                     callback = function (err) {
                         if (err) {
-                            console.error(err);
+                            console.log("error");
                         }
-                    }
+                    };
                 }
-                return mongoStore.delete(fileId, callback);
+
+                const collectionName = options.collectionName + '.files';
+                db.collection(collectionName).findOne({'_id': fileId}).then((file) => {
+                    if (file) {
+                        mongoStore.delete(fileId, callback);
+                    }
+                });
             };
 
             /**
@@ -87,7 +91,7 @@ export class GridFSStore extends UploadFS.Store {
              * @return {*}
              */
             this.getReadStream = function (fileId, file, options) {
-                options = _.extend({}, options);
+                options = Object.assign({}, options);
                 return mongoStore.openDownloadStream(fileId, {
                     start: options.start,
                     end: options.end
