@@ -22,9 +22,8 @@
  * SOFTWARE.
  *
  */
-import {Meteor} from "meteor/meteor";
-import {UploadFS} from "meteor/jalik:ufs";
-
+import { UploadFS } from 'meteor/jalik:ufs';
+import { Meteor } from 'meteor/meteor';
 
 /**
  * GridFS store
@@ -33,90 +32,90 @@ import {UploadFS} from "meteor/jalik:ufs";
  */
 export class GridFSStore extends UploadFS.Store {
 
-    constructor(options) {
-        // Default options
-        options = Object.assign({
-            chunkSize: 1024 * 255,
-            collectionName: 'uploadfs'
-        }, options);
+  constructor(options) {
+    // Default options
+    options = Object.assign({
+      chunkSize: 1024 * 255,
+      collectionName: 'uploadfs',
+    }, options);
 
-        // Check options
-        if (typeof options.chunkSize !== "number") {
-            throw new TypeError("GridFSStore: chunkSize is not a number");
-        }
-        if (typeof options.collectionName !== "string") {
-            throw new TypeError("GridFSStore: collectionName is not a string");
-        }
-
-        super(options);
-
-        this.chunkSize = parseInt(options.chunkSize);
-        this.collectionName = options.collectionName;
-
-        if (Meteor.isServer) {
-            let mongo = Package.mongo.MongoInternals.NpmModule;
-            let db = Package.mongo.MongoInternals.defaultRemoteCollectionDriver().mongo.db;
-            let mongoStore = new mongo.GridFSBucket(db, {
-                bucketName: options.collectionName,
-                chunkSizeBytes: this.chunkSize
-            });
-
-            /**
-             * Removes the file
-             * @param fileId
-             * @param callback
-             */
-            this.delete = function (fileId, callback) {
-                if (typeof callback !== 'function') {
-                    callback = function (err) {
-                        if (err) {
-                            console.log("error");
-                        }
-                    };
-                }
-
-                const collectionName = options.collectionName + '.files';
-                db.collection(collectionName).findOne({'_id': fileId}).then((file) => {
-                    if (file) {
-                        mongoStore.delete(fileId, callback);
-                    }
-                });
-            };
-
-            /**
-             * Returns the file read stream
-             * @param fileId
-             * @param file
-             * @param options
-             * @return {*}
-             */
-            this.getReadStream = function (fileId, file, options) {
-                options = Object.assign({}, options);
-                return mongoStore.openDownloadStream(fileId, {
-                    start: options.start,
-                    end: options.end
-                });
-            };
-
-            /**
-             * Returns the file write stream
-             * @param fileId
-             * @param file
-             * @param options
-             * @return {*}
-             */
-            this.getWriteStream = function (fileId, file, options) {
-                let writeStream = mongoStore.openUploadStreamWithId(fileId, fileId, {
-                    chunkSizeBytes: this.chunkSize,
-                    contentType: file.type
-                });
-                writeStream.on('close', function () {
-                    writeStream.emit('finish');
-                });
-                return writeStream;
-            };
-        }
+    // Check options
+    if (typeof options.chunkSize !== 'number') {
+      throw new TypeError('GridFSStore: chunkSize is not a number');
     }
+    if (typeof options.collectionName !== 'string') {
+      throw new TypeError('GridFSStore: collectionName is not a string');
+    }
+
+    super(options);
+
+    this.chunkSize = parseInt(options.chunkSize);
+    this.collectionName = options.collectionName;
+
+    if (Meteor.isServer) {
+      let mongo = Package.mongo.MongoInternals.NpmModule;
+      let db = Package.mongo.MongoInternals.defaultRemoteCollectionDriver().mongo.db;
+      let mongoStore = new mongo.GridFSBucket(db, {
+        bucketName: options.collectionName,
+        chunkSizeBytes: this.chunkSize,
+      });
+
+      /**
+       * Removes the file
+       * @param fileId
+       * @param callback
+       */
+      this.delete = function (fileId, callback) {
+        if (typeof callback !== 'function') {
+          callback = function (err) {
+            if (err) {
+              console.log('error');
+            }
+          };
+        }
+
+        const collectionName = options.collectionName + '.files';
+        db.collection(collectionName).findOne({ '_id': fileId }).then((file) => {
+          if (file) {
+            mongoStore.delete(fileId, callback);
+          }
+        });
+      };
+
+      /**
+       * Returns the file read stream
+       * @param fileId
+       * @param file
+       * @param options
+       * @return {*}
+       */
+      this.getReadStream = function (fileId, file, options) {
+        options = Object.assign({}, options);
+        return mongoStore.openDownloadStream(fileId, {
+          start: options.start,
+          end: options.end,
+        });
+      };
+
+      /**
+       * Returns the file write stream
+       * @param fileId
+       * @param file
+       * @param options
+       * @return {*}
+       */
+      this.getWriteStream = function (fileId, file, options) {
+        let writeStream = mongoStore.openUploadStreamWithId(fileId, fileId, {
+          chunkSizeBytes: this.chunkSize,
+          contentType: file.type,
+        });
+        writeStream.on('close', function () {
+          writeStream.emit('finish');
+        });
+        return writeStream;
+      };
+    }
+  }
 }
 
 // Add store to UFS namespace
