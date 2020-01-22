@@ -50,7 +50,7 @@ export class GridFSStore extends UploadFS.Store {
 
         super(options);
 
-        this.chunkSize = options.chunkSize;
+        this.chunkSize = parseInt(options.chunkSize);
         this.collectionName = options.collectionName;
 
         if (Meteor.isServer) {
@@ -58,7 +58,7 @@ export class GridFSStore extends UploadFS.Store {
             let db = Package.mongo.MongoInternals.defaultRemoteCollectionDriver().mongo.db;
             let mongoStore = new mongo.GridFSBucket(db, {
                 bucketName: options.collectionName,
-                chunkSizeBytes: options.chunkSize
+                chunkSizeBytes: this.chunkSize
             });
 
             /**
