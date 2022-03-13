@@ -91,9 +91,15 @@ export class GridFSStore extends UploadFS.Store {
        */
       this.getReadStream = function (fileId, file, options) {
         options = Object.assign({}, options);
+        //  try fix https://github.com/mongodb/node-mongodb-native/blob/b578d89/src/gridfs/download.ts#L428
+        // start +  end is undefined, which will skip the option.start != null block and throw Error ---
+        // so make sure it at least to be 0 , emmmm , spend my sleep time to findout it cause, i...
+        function validNumber(val) {
+          return ( typeof val==="number" && val >= 0) ? val : 0
+        }
         return mongoStore.openDownloadStream(fileId, {
-          start: options.start,
-          end: options.end,
+          start: validNumber(options.start),
+          end: validNumber(options.end),
         });
       };
 
