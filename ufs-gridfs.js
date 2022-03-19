@@ -91,10 +91,7 @@ export class GridFSStore extends UploadFS.Store {
        */
       this.getReadStream = function (fileId, file, options) {
         options = Object.assign({}, options);
-        return mongoStore.openDownloadStream(fileId, {
-          start: options.start,
-          end: options.end,
-        });
+        return mongoStore.openDownloadStream(fileId, options);
       };
 
       /**
