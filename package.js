@@ -36,8 +36,8 @@ Package.describe({
 
 Package.onUse(function (api) {
   api.versionsFrom('2.6.1');
-  api.use('ecmascript');
-  api.use('mongo');
+  api.use('ecmascript@0.14.0');
+  api.use('mongo@1.8.0');
   api.use('jalik:ufs@1.0.4');
   api.mainModule('ufs-gridfs.js');
 });
