@@ -106,8 +106,14 @@ export class GridFSStore extends UploadFS.Store {
           chunkSizeBytes: this.chunkSize,
           contentType: file.type,
         });
+        let finished = false;
+        writeStream.on('finish', function () {
+          finished = true;
+        });
         writeStream.on('close', function () {
-          writeStream.emit('finish');
+          if (!finished) {
+            writeStream.emit('finish');
+          }
         });
         return writeStream;
       };
